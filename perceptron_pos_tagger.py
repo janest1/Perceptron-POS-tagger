@@ -142,7 +142,7 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
-                if x % 5 == 0:
+                if x % 100 == 0:
                     print('sentence', x)
                     print('p:', predicted)
                     print('g:', sent)
@@ -161,11 +161,11 @@ class Perceptron_POS_Tagger(object):
                 tagged_dev.append(dev_tagged)
 
                 if dev_count % 50 == 0:
-                    print('iteration ', i)
-                    print('len(plain_mini_dev):{}, len(tagged_dev):{}'.format(len(plain_mini_dev), len(tagged_dev)))
-                    print('dev sentence', dev_count)
+                    print('~~tagging dev. Mini iteration ', i)
+                    print('~~len(plain_mini_dev):{}, len(tagged_dev):{}'.format(len(plain_mini_dev), len(tagged_dev)))
+                    print('~~dev sentence', dev_count)
                     print(dev_tagged)
-                    print('########################')
+                    print('~~########################')
                 dev_count += 1
 
             print()

@@ -70,6 +70,7 @@ if __name__ == '__main__':
     my_tagger.train(train_data, gold_dev_data)
 
     # Apply your tagger on dev & test data
+    print('tagging test data...')
     auto_test_data = my_tagger.tag(test_data)
 
     # Output your auto tagged data

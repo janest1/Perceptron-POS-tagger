@@ -105,7 +105,7 @@ class Perceptron_POS_Tagger(object):
         results_file = open('10000train_1000dev_averaged.txt', 'w')
         # plain_dev = [[tup[0] for tup in sent] for sent in dev_data]
 
-        for i in range(5):
+        for i in range(1):
             print('--------------------------------')
             print('minibatch_iteration ', i)
             x = 0
@@ -146,7 +146,9 @@ class Perceptron_POS_Tagger(object):
                 x += 1
 
             #self.weights += minibatch_update.element_wise_divide(len(minibatch))
-            self.weights += (minibatch_update.rmul(len(minibatch)))
+            print('minibatch_update', minibatch_update)
+            print('updating weights')
+            self.weights += (1/len(minibatch)) * minibatch_update
 
             tagged_dev = []
             dev_count = 0
@@ -165,4 +167,4 @@ class Perceptron_POS_Tagger(object):
             print()
             acc = self.compute_accuracy(mini_dev, tagged_dev)
             print(acc)
-            results_file.write(str(x) + '\t' + str(acc) + '\n')
+            results_file.write(str(i) + '\t' + str(acc) + '\n')

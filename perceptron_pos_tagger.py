@@ -140,13 +140,6 @@ class Perceptron_POS_Tagger(object):
                     else:
                         print('correct prediction')
 
-                    if train_sentence_count % 100 == 0:
-                        print('mini training iteration', i)
-                        print('training sentence', train_sentence_count)
-                        print('p:', tagged_initial_sent)
-                        print('g:', sent)
-                        print('******')
-
                     train_sentence_count += 1
 
             else:

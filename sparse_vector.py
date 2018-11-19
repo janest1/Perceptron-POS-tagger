@@ -59,13 +59,6 @@ class Vector:
             tmp += key + ': ' + str(self.v[key]) + '\t'
         return tmp
 
-    def element_wise_divide(self, num):
-        result = Vector({})
-        for key in self.v:
-            result.v[key] = self.v[key] / num
-
-        return result
-
     def element_wise_square(self):
         result = Vector({})
         for key in self.v:

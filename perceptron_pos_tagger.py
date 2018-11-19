@@ -35,6 +35,15 @@ class Perceptron_POS_Tagger(object):
 
         return correct / total
 
+    def get_sentence_features(self, tagged_sentence):
+        sentence_vector = self.featurize(tagged_sentence[0][0], tagged_sentence[0][1], '$START', '<S>')
+
+        for i in range(1, len(tagged_sentence)):
+            sentence_vector += self.featurize(tagged_sentence[i][0], tagged_sentence[i][1], tagged_sentence[i - 1][0],
+                                              tagged_sentence[i - 1][1])
+
+        return sentence_vector
+
     def tag(self, test_sent):
         ''' Implement the Viterbi decoding algorithm here.
         '''
@@ -69,7 +78,7 @@ class Perceptron_POS_Tagger(object):
 
         # termination steps
         max_score = 0
-        best_tag = 'NNS'
+        best_tag = 'NN'
 
         # get best score of transition from each state to end state
         for tag in self.tags:
@@ -102,66 +111,85 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('10000train_1000dev_averaged.txt', 'w')
-        # plain_dev = [[tup[0] for tup in sent] for sent in dev_data]
+        results_file = open('10000train_800dev_averaged.txt', 'w')
 
-        for i in range(1):
+        for i in range(5):
             print('--------------------------------')
             print('minibatch_iteration ', i)
-            x = 0
-            minibatch = []
-            for k in range(10000):
-                minibatch.append(random.choice(train_data))
-            mini_dev = []
-            for m in range(1000):
-                mini_dev.append(random.choice(dev_data))
-
-            plain_mini_dev = [[tup[0] for tup in sent] for sent in mini_dev]
-
+            train_sentence_count = 0
+            minibatch = random.sample(train_data, 10000)
+            mini_dev = random.sample(dev_data, 800)
             minibatch_update = Vector({})
-            for sent in minibatch:
-                plain_sent = [tup[0] for tup in sent]
-                predicted = self.tag(plain_sent)
 
-                # featurize gold and predicted to get representations for full sequence
-                predicted_feats = self.featurize(predicted[0][0], predicted[0][1], '$START', '<S>')
-                gold_feats = self.featurize(sent[0][0], sent[0][1], '$START', '<S>')
-                for j in range(1, len(predicted)):
-                    predicted_feats += self.featurize(predicted[j][0], predicted[j][1], predicted[j-1][0], predicted[j-1][1])
-                    gold_feats += self.featurize(sent[j][0], sent[j][1], sent[j-1][0], sent[j-1][1])
+            if i == 0:
+                # first iteration has all zero weights, so a default tag of NN is chosen for each
+                # step in the sequence. Get first round of averaged perceptron weight updates using
+                # this assumption instead of running Viterbi on the first iteration
+                print('tagging initial iteration')
 
-                # adjust weights according to difference between correct and predicted sequence
-                if predicted_feats != gold_feats:
-                    minibatch_update += gold_feats - predicted_feats
-                else:
-                    print('correct prediction')
+                for sent in minibatch:
+                    tagged_initial_sent = [[tup[0], 'NN'] for tup in sent]
 
-                if x % 100 == 0:
-                    print('mini training iteration', i)
-                    print('sentence', x)
-                    print('p:', predicted)
-                    print('g:', sent)
-                    print('******')
+                    # featurize gold and predicted to get representations for full sequence
+                    predicted_feats = self.get_sentence_features(tagged_initial_sent)
+                    gold_feats = self.get_sentence_features(sent)
 
-                x += 1
+                    # adjust weights according to difference between correct and predicted sequence
+                    if predicted_feats != gold_feats:
+                        minibatch_update += gold_feats - predicted_feats
+                    else:
+                        print('correct prediction')
 
-            #self.weights += minibatch_update.element_wise_divide(len(minibatch))
-            print('minibatch_update', minibatch_update)
-            print('updating weights')
+                    if train_sentence_count % 100 == 0:
+                        print('mini training iteration', i)
+                        print('training sentence', train_sentence_count)
+                        print('p:', tagged_initial_sent)
+                        print('g:', sent)
+                        print('******')
+
+                    train_sentence_count += 1
+
+            else:
+                for sent in minibatch:
+                    plain_sent = [tup[0] for tup in sent]
+                    predicted = self.tag(plain_sent)
+
+                    # featurize gold and predicted to get representations for full sequence
+                    predicted_feats = self.get_sentence_features(predicted)
+                    gold_feats = self.get_sentence_features(sent)
+
+                    # adjust weights according to difference between correct and predicted sequence
+                    if predicted_feats != gold_feats:
+                        minibatch_update += gold_feats - predicted_feats
+                    else:
+                        print('correct prediction')
+
+                    if train_sentence_count % 100 == 0:
+                        print('mini training iteration', i)
+                        print('training sentence', train_sentence_count)
+                        print('p:', predicted)
+                        print('g:', sent)
+                        print('******')
+
+                    train_sentence_count += 1
+
+            print('updating weights....')
             self.weights += (1/len(minibatch)) * minibatch_update
 
             tagged_dev = []
             dev_count = 0
-            for dev_sent in plain_mini_dev:
-                dev_tagged = self.tag(dev_sent)
+            print('tagging dev set....')
+            for dev_sent in mini_dev:
+                plain_dev_sent = [tup[0] for tup in dev_sent]
+                dev_tagged = self.tag(plain_dev_sent)
                 tagged_dev.append(dev_tagged)
 
                 if dev_count % 50 == 0:
                     print('~~tagging dev after mini iteration ', i)
-                    print('~~len(plain_mini_dev):{}, len(tagged_dev):{}'.format(len(plain_mini_dev), len(tagged_dev)))
+                    print('~~len(plain_mini_dev):{}, len(tagged_dev):{}'.format(len(mini_dev), len(tagged_dev)))
                     print('~~dev sentence', dev_count)
                     print(dev_tagged)
-                    print('~~########################')
+                    print('~~~~~~~~~~~~~~~~~~~~~~~~~~')
                 dev_count += 1
 
             print()

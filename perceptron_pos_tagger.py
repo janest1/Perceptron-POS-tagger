@@ -110,21 +110,16 @@ class Perceptron_POS_Tagger(object):
             print('minibatch_iteration ', i)
             x = 0
             minibatch = []
-            # online_train = []
             for k in range(10000):
                 minibatch.append(random.choice(train_data))
-                #online_train.append(random.choice(train_data))
             mini_dev = []
-            #online_dev = []
             for m in range(1000):
                 mini_dev.append(random.choice(dev_data))
-                #online_dev.append(random.choice(dev_data))
 
             plain_mini_dev = [[tup[0] for tup in sent] for sent in mini_dev]
 
             minibatch_update = Vector({})
             for sent in minibatch:
-            #for sent in online_train:
                 plain_sent = [tup[0] for tup in sent]
                 predicted = self.tag(plain_sent)
 
@@ -137,12 +132,12 @@ class Perceptron_POS_Tagger(object):
 
                 # adjust weights according to difference between correct and predicted sequence
                 if predicted_feats != gold_feats:
-                    #self.weights += gold_feats - predicted_feats
                     minibatch_update += gold_feats - predicted_feats
                 else:
                     print('correct prediction')
 
                 if x % 100 == 0:
+                    print('mini training iteration', i)
                     print('sentence', x)
                     print('p:', predicted)
                     print('g:', sent)
@@ -151,17 +146,16 @@ class Perceptron_POS_Tagger(object):
                 x += 1
 
             #self.weights += minibatch_update.element_wise_divide(len(minibatch))
-            self.weights.__rmul__(minibatch_update)
+            self.weights += (minibatch_update.rmul(len(minibatch)))
 
             tagged_dev = []
             dev_count = 0
             for dev_sent in plain_mini_dev:
-            #for dev_sent in online_dev:
                 dev_tagged = self.tag(dev_sent)
                 tagged_dev.append(dev_tagged)
 
                 if dev_count % 50 == 0:
-                    print('~~tagging dev. Mini iteration ', i)
+                    print('~~tagging dev after mini iteration ', i)
                     print('~~len(plain_mini_dev):{}, len(tagged_dev):{}'.format(len(plain_mini_dev), len(tagged_dev)))
                     print('~~dev sentence', dev_count)
                     print(dev_tagged)

@@ -38,7 +38,7 @@ def output_auto_data(auto_data):
         using the same format as the provided gold data (i.e. word_pos word_pos ...)
     '''
 
-    with open('dev_tagged.txt', 'w') as outfile:
+    with open('10000_train_1000_dev_online.txt', 'w') as outfile:
         for line in auto_data:
             outfile.write(str(line))
             outfile.write('\n')

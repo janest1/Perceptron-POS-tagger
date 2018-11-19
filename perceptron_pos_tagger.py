@@ -102,29 +102,23 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('10000train_1000dev_averaged.txt', 'w')
+        results_file = open('10000train_1000dev_online.txt', 'w')
         # plain_dev = [[tup[0] for tup in sent] for sent in dev_data]
 
         for i in range(5):
             print('--------------------------------')
-            print('minibatch_iteration ', i)
+            print('online_iteration ', i)
             x = 0
-            minibatch = []
-            # online_train = []
+            online_train = []
             for k in range(10000):
-                minibatch.append(random.choice(train_data))
-                #online_train.append(random.choice(train_data))
-            mini_dev = []
-            #online_dev = []
+                online_train.append(random.choice(train_data))
+            online_dev = []
             for m in range(1000):
-                mini_dev.append(random.choice(dev_data))
-                #online_dev.append(random.choice(dev_data))
+                online_dev.append(random.choice(dev_data))
 
-            plain_mini_dev = [[tup[0] for tup in sent] for sent in mini_dev]
+            plain_online_dev = [[tup[0] for tup in sent] for sent in online_dev]
 
-            minibatch_update = Vector({})
-            for sent in minibatch:
-            #for sent in online_train:
+            for sent in online_train:
                 plain_sent = [tup[0] for tup in sent]
                 predicted = self.tag(plain_sent)
 
@@ -137,8 +131,7 @@ class Perceptron_POS_Tagger(object):
 
                 # adjust weights according to difference between correct and predicted sequence
                 if predicted_feats != gold_feats:
-                    #self.weights += gold_feats - predicted_feats
-                    minibatch_update += gold_feats - predicted_feats
+                    self.weights += gold_feats - predicted_feats
                 else:
                     print('correct prediction')
 
@@ -150,25 +143,21 @@ class Perceptron_POS_Tagger(object):
 
                 x += 1
 
-            #self.weights += minibatch_update.element_wise_divide(len(minibatch))
-            self.weights.__rmul__(minibatch_update)
-
             tagged_dev = []
             dev_count = 0
-            for dev_sent in plain_mini_dev:
-            #for dev_sent in online_dev:
+            for dev_sent in plain_online_dev:
                 dev_tagged = self.tag(dev_sent)
                 tagged_dev.append(dev_tagged)
 
                 if dev_count % 50 == 0:
-                    print('~~tagging dev. Mini iteration ', i)
-                    print('~~len(plain_mini_dev):{}, len(tagged_dev):{}'.format(len(plain_mini_dev), len(tagged_dev)))
+                    print('~~tagging dev. online iteration ', i)
+                    print('~~len(plain_online_dev):{}, len(tagged_dev):{}'.format(len(plain_online_dev), len(tagged_dev)))
                     print('~~dev sentence', dev_count)
                     print(dev_tagged)
                     print('~~########################')
                 dev_count += 1
 
             print()
-            acc = self.compute_accuracy(mini_dev, tagged_dev)
+            acc = self.compute_accuracy(online_dev, tagged_dev)
             print(acc)
             results_file.write(str(x) + '\t' + str(acc) + '\n')

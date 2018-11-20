@@ -58,11 +58,11 @@ if __name__ == '__main__':
     my_tagger.train(train_data, gold_dev_data)
 
     # Apply your tagger on dev & test data
-    print('tagging test data...')
-    with open('small_averaged_8_test.txt', 'w') as outfile:
-        for sent in test_data:
-            tagged = my_tagger.tag(sent)
-            for word in tagged:
-                outfile.write('{}_{} '.format(word[0], word[1]))
-
-            outfile.write('\n')
+    # print('tagging test data...')
+    # with open('small_averaged_8_test_smaller_update.txt', 'w') as outfile:
+    #     for sent in test_data:
+    #         tagged = my_tagger.tag(sent)
+    #         for word in tagged:
+    #             outfile.write('{}_{} '.format(word[0], word[1]))
+    #
+    #         outfile.write('\n')

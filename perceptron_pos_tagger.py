@@ -112,6 +112,7 @@ class Perceptron_POS_Tagger(object):
         '''
 
         results_file = open('25000train_1000dev_averaged.txt', 'w')
+        results_file.write('2500 train 1000 dev averaged\n')
 
         for i in range(5):
             print('--------------------------------')
@@ -137,7 +138,7 @@ class Perceptron_POS_Tagger(object):
 
                 # adjust weights according to difference between correct and predicted sequence
                 if predicted_feats != gold_feats:
-                    minibatch_update += gold_feats - predicted_feats
+                    minibatch_update += (gold_feats - predicted_feats)
                 else:
                     print('correct prediction')
 
@@ -151,7 +152,7 @@ class Perceptron_POS_Tagger(object):
                 # train_sentence_count += 1
 
             print('updating weights....')
-            self.weights += (1/len(minibatch)) * minibatch_update
+            self.weights += ((1/len(minibatch)) * minibatch_update)
 
             tagged_dev = []
             #dev_count = 0

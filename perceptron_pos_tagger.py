@@ -118,7 +118,7 @@ class Perceptron_POS_Tagger(object):
             print('minibatch_iteration ', i)
             train_sentence_count = 0
             minibatch = random.sample(train_data, 10000)
-            mini_dev = random.sample(dev_data, 800)
+            mini_dev = random.sample(dev_data, 1000)
             minibatch_update = Vector({})
 
             for sent in minibatch:
@@ -141,7 +141,7 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
-                if train_sentence_count % 100 == 0:
+                if train_sentence_count % 1000 == 0:
                     print('mini training iteration', i)
                     print('training sentence', train_sentence_count)
                     print('p:', predicted)
@@ -161,9 +161,8 @@ class Perceptron_POS_Tagger(object):
                 dev_tagged = self.tag(plain_dev_sent)
                 tagged_dev.append(dev_tagged)
 
-                if dev_count % 50 == 0:
+                if dev_count % 100 == 0:
                     print('~~tagging dev after mini iteration ', i)
-                    print('~~len(plain_mini_dev):{}, len(tagged_dev):{}'.format(len(mini_dev), len(tagged_dev)))
                     print('~~dev sentence', dev_count)
                     print(dev_tagged)
                     print('~~~~~~~~~~~~~~~~~~~~~~~~~~')

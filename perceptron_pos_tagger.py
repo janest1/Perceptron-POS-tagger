@@ -111,13 +111,13 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('10000train_800dev_averaged.txt', 'w')
+        results_file = open('25000train_1000dev_averaged.txt', 'w')
 
         for i in range(5):
             print('--------------------------------')
             print('minibatch_iteration ', i)
             #train_sentence_count = 0
-            minibatch = random.sample(train_data, 10000)
+            minibatch = random.sample(train_data, 25000)
             mini_dev = random.sample(dev_data, 1000)
             minibatch_update = Vector({})
 

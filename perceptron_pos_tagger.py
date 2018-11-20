@@ -114,7 +114,7 @@ class Perceptron_POS_Tagger(object):
         results_file = open('1000train_500dev_online.txt', 'w')
         # plain_dev = [[tup[0] for tup in sent] for sent in dev_data]
 
-        for i in range(5):
+        for i in range(8):
             print('--------------------------------')
             print('online_iteration ', i)
             train_sentence_count = 0
@@ -134,14 +134,14 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
-                if train_sentence_count % 500 == 0:
-                    print('online training iteration ', i)
-                    print('training sentence', train_sentence_count)
-                    print('p:', predicted)
-                    print('g:', sent)
-                    print('******')
-
-                train_sentence_count += 1
+                # if train_sentence_count % 500 == 0:
+                #     print('online training iteration ', i)
+                #     print('training sentence', train_sentence_count)
+                #     print('p:', predicted)
+                #     print('g:', sent)
+                #     print('******')
+                #
+                # train_sentence_count += 1
 
             tagged_dev = []
             dev_count = 0
@@ -150,11 +150,11 @@ class Perceptron_POS_Tagger(object):
                 dev_tagged = self.tag([tup[0] for tup in dev_sent])
                 tagged_dev.append(dev_tagged)
 
-                if dev_count % 200 == 0:
-                    print('~~tagging dev. online iteration ', i)
-                    print('~~dev sentence', dev_count)
-                    print('~~########################')
-                dev_count += 1
+                # if dev_count % 200 == 0:
+                #     print('~~tagging dev. online iteration ', i)
+                #     print('~~dev sentence', dev_count)
+                #     print('~~########################')
+                # dev_count += 1
 
             print()
             acc = self.compute_accuracy(online_dev, tagged_dev)

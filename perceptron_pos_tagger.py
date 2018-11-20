@@ -111,7 +111,7 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('1000train_500dev_averaged.txt', 'w')
+        results_file = open('1000train_500dev_averaged_smaller_update.txt', 'w')
         results_file.write('1000 train 500 dev averaged (update weights after 100 every iteration)\n')
 
         for i in range(8):
@@ -154,6 +154,7 @@ class Perceptron_POS_Tagger(object):
                 # update weights with averaged error correction after every 100 sentences per training iteration
                 if sent_count % 100 == 0:
                     print('updating weights....')
+                    print('sent_count', sent_count)
                     self.weights += (.01 * minibatch_update)
                     minibatch_update = Vector({})
 

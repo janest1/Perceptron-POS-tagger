@@ -116,10 +116,10 @@ class Perceptron_POS_Tagger(object):
 
         for i in range(8):
             print('--------------------------------')
-            print('minibatch_iteration ', i)
+            print('small minibatch_iteration ', i)
             #train_sentence_count = 0
-            minibatch = random.sample(train_data, 10)
-            mini_dev = random.sample(dev_data, 3)
+            minibatch = random.sample(train_data, 1000)
+            mini_dev = random.sample(dev_data, 500)
             minibatch_update = Vector({})
 
             for sent in minibatch:

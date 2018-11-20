@@ -55,7 +55,7 @@ class Perceptron_POS_Tagger(object):
         for tag in self.tags:
             backpointer[tag] = {}
             initial_vector = self.featurize(test_sent[0], tag, '$START', '<S>')
-            trellis[tag][0] = initial_vector.dot(self.weights)
+            trellis[tag][0] = self.weights.dot(initial_vector)
             backpointer[tag][0] = '<S>'
 
         # recursive step
@@ -68,7 +68,7 @@ class Perceptron_POS_Tagger(object):
                     tmp = self.featurize(test_sent[t], tag, test_sent[t-1], tag_prime)
 
                     # compute score for each tag using feature representations
-                    current_score = trellis[tag_prime][t-1] + tmp.dot(self.weights)
+                    current_score = trellis[tag_prime][t-1] + self.weights.dot(tmp)
                     if current_score > max_score:
                         max_score = current_score
                         best_tag = tag_prime
@@ -83,7 +83,7 @@ class Perceptron_POS_Tagger(object):
         # get best score of transition from each state to end state
         for tag in self.tags:
             final_vector = self.featurize('$END', '</S>', test_sent[-1], tag)
-            current_score = trellis[tag][len(test_sent)-1] + final_vector.dot(self.weights)
+            current_score = trellis[tag][len(test_sent)-1] + self.weights.dot(final_vector)
 
             if current_score > max_score:
                 max_score = current_score
@@ -121,50 +121,34 @@ class Perceptron_POS_Tagger(object):
             mini_dev = random.sample(dev_data, 800)
             minibatch_update = Vector({})
 
-            if i == 0:
-                # first iteration has all zero weights, so a default tag of NN is chosen for each
-                # step in the sequence. Get first round of averaged perceptron weight updates using
-                # this assumption instead of running Viterbi on the first iteration
-                print('tagging initial iteration')
+            for sent in minibatch:
+                if i == 0:
+                    # first iteration has all zero weights, so a default tag of NN is chosen for each
+                    # step in the sequence. Get first round of averaged perceptron weight updates using
+                    # this assumption instead of running Viterbi on the first iteration
+                    predicted = [[tup[0], 'NN'] for tup in sent]
 
-                for sent in minibatch:
-                    tagged_initial_sent = [[tup[0], 'NN'] for tup in sent]
+                else:
+                    predicted = self.tag([tup[0] for tup in sent])
 
-                    # featurize gold and predicted to get representations for full sequence
-                    predicted_feats = self.get_sentence_features(tagged_initial_sent)
-                    gold_feats = self.get_sentence_features(sent)
+                # featurize gold and predicted to get representations for full sequence
+                predicted_feats = self.get_sentence_features(predicted)
+                gold_feats = self.get_sentence_features(sent)
 
-                    # adjust weights according to difference between correct and predicted sequence
-                    if predicted_feats != gold_feats:
-                        minibatch_update += gold_feats - predicted_feats
-                    else:
-                        print('correct prediction')
+                # adjust weights according to difference between correct and predicted sequence
+                if predicted_feats != gold_feats:
+                    minibatch_update += gold_feats - predicted_feats
+                else:
+                    print('correct prediction')
 
-                    train_sentence_count += 1
+                if train_sentence_count % 100 == 0:
+                    print('mini training iteration', i)
+                    print('training sentence', train_sentence_count)
+                    print('p:', predicted)
+                    print('g:', sent)
+                    print('******')
 
-            else:
-                for sent in minibatch:
-                    plain_sent = [tup[0] for tup in sent]
-                    predicted = self.tag(plain_sent)
-
-                    # featurize gold and predicted to get representations for full sequence
-                    predicted_feats = self.get_sentence_features(predicted)
-                    gold_feats = self.get_sentence_features(sent)
-
-                    # adjust weights according to difference between correct and predicted sequence
-                    if predicted_feats != gold_feats:
-                        minibatch_update += gold_feats - predicted_feats
-                    else:
-                        print('correct prediction')
-
-                    if train_sentence_count % 100 == 0:
-                        print('mini training iteration', i)
-                        print('training sentence', train_sentence_count)
-                        print('p:', predicted)
-                        print('g:', sent)
-                        print('******')
-
-                    train_sentence_count += 1
+                train_sentence_count += 1
 
             print('updating weights....')
             self.weights += (1/len(minibatch)) * minibatch_update

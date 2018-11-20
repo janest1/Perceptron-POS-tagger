@@ -118,11 +118,11 @@ class Perceptron_POS_Tagger(object):
             print('--------------------------------')
             print('minibatch_iteration ', i)
             #train_sentence_count = 0
-            minibatch = random.sample(train_data, 1000)
-            mini_dev = random.sample(dev_data, 500)
+            minibatch = random.sample(train_data, 10)
+            mini_dev = random.sample(dev_data, 3)
             minibatch_update = Vector({})
 
-            for sent_count, sent in enumerate(minibatch):
+            for sent in minibatch:
                 if i == 0:
                     # first iteration has all zero weights, so a default tag of NN is chosen for each
                     # step in the sequence. Get first round of averaged perceptron weight updates using
@@ -151,15 +151,10 @@ class Perceptron_POS_Tagger(object):
 
                 #train_sentence_count += 1
 
-                # update weights with averaged error correction after every 100 sentences per training iteration
-                if sent_count % 100 == 0:
-                    print('updating weights....')
-                    print('sent_count', sent_count)
-                    self.weights += (.01 * minibatch_update)
-                    minibatch_update = Vector({})
-
-            # print('updating weights....')
-            # self.weights += (1/len(minibatch)) * minibatch_update
+            print('updating weights....')
+            #self.weights += (1/len(minibatch)) * minibatch_update
+            self.weights += minibatch_update
+            self.weights = (1/len(minibatch)) * self.weights
 
             tagged_dev = []
             #dev_count = 0

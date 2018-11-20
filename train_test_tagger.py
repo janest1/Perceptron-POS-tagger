@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     # Apply your tagger on dev & test data
     print('tagging test data...')
-    with open('auto_tagged_online.txt', 'w') as outfile:
+    with open('small_tagged_online.txt', 'w') as outfile:
         for sent in test_data:
             tagged = my_tagger.tag(sent)
             for word in tagged:

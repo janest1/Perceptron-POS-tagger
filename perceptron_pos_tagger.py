@@ -111,15 +111,15 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('10000train_800dev_online.txt', 'w')
+        results_file = open('1000train_500dev_online.txt', 'w')
         # plain_dev = [[tup[0] for tup in sent] for sent in dev_data]
 
         for i in range(5):
             print('--------------------------------')
             print('online_iteration ', i)
             train_sentence_count = 0
-            online_train = random.sample(train_data, 10000)
-            online_dev = random.sample(dev_data, 800)
+            online_train = random.sample(train_data, 1000)
+            online_dev = random.sample(dev_data, 500)
 
             for sent in online_train:
                 predicted = self.tag([tup[0] for tup in sent])

@@ -112,7 +112,7 @@ class Perceptron_POS_Tagger(object):
         '''
 
         results_file = open('25000train_800dev_online.txt', 'w')
-        # plain_dev = [[tup[0] for tup in sent] for sent in dev_data]
+        results_file.write('25000 train 1000 dev online\n')
 
         for i in range(5):
             print('--------------------------------')

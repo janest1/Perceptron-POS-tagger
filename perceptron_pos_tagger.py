@@ -35,6 +35,15 @@ class Perceptron_POS_Tagger(object):
 
         return correct / total
 
+    def get_sentence_features(self, tagged_sentence):
+        sentence_vector = self.featurize(tagged_sentence[0][0], tagged_sentence[0][1], '$START', '<S>')
+
+        for i in range(1, len(tagged_sentence)):
+            sentence_vector += self.featurize(tagged_sentence[i][0], tagged_sentence[i][1], tagged_sentence[i - 1][0],
+                                              tagged_sentence[i - 1][1])
+
+        return sentence_vector
+
     def tag(self, test_sent):
         ''' Implement the Viterbi decoding algorithm here.
         '''
@@ -46,7 +55,7 @@ class Perceptron_POS_Tagger(object):
         for tag in self.tags:
             backpointer[tag] = {}
             initial_vector = self.featurize(test_sent[0], tag, '$START', '<S>')
-            trellis[tag][0] = initial_vector.dot(self.weights)
+            trellis[tag][0] = self.weights.dot(initial_vector)
             backpointer[tag][0] = '<S>'
 
         # recursive step
@@ -59,7 +68,7 @@ class Perceptron_POS_Tagger(object):
                     tmp = self.featurize(test_sent[t], tag, test_sent[t-1], tag_prime)
 
                     # compute score for each tag using feature representations
-                    current_score = trellis[tag_prime][t-1] + tmp.dot(self.weights)
+                    current_score = trellis[tag_prime][t-1] + self.weights.dot(tmp)
                     if current_score > max_score:
                         max_score = current_score
                         best_tag = tag_prime
@@ -74,7 +83,7 @@ class Perceptron_POS_Tagger(object):
         # get best score of transition from each state to end state
         for tag in self.tags:
             final_vector = self.featurize('$END', '</S>', test_sent[-1], tag)
-            current_score = trellis[tag][len(test_sent)-1] + final_vector.dot(self.weights)
+            current_score = trellis[tag][len(test_sent)-1] + self.weights.dot(final_vector)
 
             if current_score > max_score:
                 max_score = current_score
@@ -102,32 +111,22 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('10000train_1000dev_online.txt', 'w')
+        results_file = open('10000train_800dev_online.txt', 'w')
         # plain_dev = [[tup[0] for tup in sent] for sent in dev_data]
 
         for i in range(5):
             print('--------------------------------')
             print('online_iteration ', i)
-            x = 0
-            online_train = []
-            for k in range(10000):
-                online_train.append(random.choice(train_data))
-            online_dev = []
-            for m in range(1000):
-                online_dev.append(random.choice(dev_data))
-
-            plain_online_dev = [[tup[0] for tup in sent] for sent in online_dev]
+            train_sentence_count = 0
+            online_train = random.sample(train_data, 10000)
+            online_dev = random.sample(dev_data, 800)
 
             for sent in online_train:
-                plain_sent = [tup[0] for tup in sent]
-                predicted = self.tag(plain_sent)
+                predicted = self.tag([tup[0] for tup in sent])
 
                 # featurize gold and predicted to get representations for full sequence
-                predicted_feats = self.featurize(predicted[0][0], predicted[0][1], '$START', '<S>')
-                gold_feats = self.featurize(sent[0][0], sent[0][1], '$START', '<S>')
-                for j in range(1, len(predicted)):
-                    predicted_feats += self.featurize(predicted[j][0], predicted[j][1], predicted[j-1][0], predicted[j-1][1])
-                    gold_feats += self.featurize(sent[j][0], sent[j][1], sent[j-1][0], sent[j-1][1])
+                predicted_feats = self.get_sentence_features(predicted)
+                gold_feats = self.get_sentence_features(sent)
 
                 # adjust weights according to difference between correct and predicted sequence
                 if predicted_feats != gold_feats:
@@ -135,23 +134,24 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
-                if x % 100 == 0:
-                    print('sentence', x)
+                if train_sentence_count % 100 == 0:
+                    print('online training iteration ', i)
+                    print('training sentence', train_sentence_count)
                     print('p:', predicted)
                     print('g:', sent)
                     print('******')
 
-                x += 1
+                train_sentence_count += 1
 
             tagged_dev = []
             dev_count = 0
-            for dev_sent in plain_online_dev:
-                dev_tagged = self.tag(dev_sent)
+            print('tagging dev set')
+            for dev_sent in online_dev:
+                dev_tagged = self.tag([tup[0] for tup in dev_sent])
                 tagged_dev.append(dev_tagged)
 
                 if dev_count % 50 == 0:
                     print('~~tagging dev. online iteration ', i)
-                    print('~~len(plain_online_dev):{}, len(tagged_dev):{}'.format(len(plain_online_dev), len(tagged_dev)))
                     print('~~dev sentence', dev_count)
                     print(dev_tagged)
                     print('~~########################')
@@ -160,4 +160,4 @@ class Perceptron_POS_Tagger(object):
             print()
             acc = self.compute_accuracy(online_dev, tagged_dev)
             print(acc)
-            results_file.write(str(x) + '\t' + str(acc) + '\n')
+            results_file.write(str(train_sentence_count) + '\t' + str(acc) + '\n')

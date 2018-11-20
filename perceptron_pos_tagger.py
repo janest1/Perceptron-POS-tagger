@@ -134,7 +134,7 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
-                if train_sentence_count % 100 == 0:
+                if train_sentence_count % 1000 == 0:
                     print('online training iteration ', i)
                     print('training sentence', train_sentence_count)
                     print('p:', predicted)
@@ -150,10 +150,9 @@ class Perceptron_POS_Tagger(object):
                 dev_tagged = self.tag([tup[0] for tup in dev_sent])
                 tagged_dev.append(dev_tagged)
 
-                if dev_count % 50 == 0:
+                if dev_count % 100 == 0:
                     print('~~tagging dev. online iteration ', i)
                     print('~~dev sentence', dev_count)
-                    print(dev_tagged)
                     print('~~########################')
                 dev_count += 1
 

@@ -32,18 +32,6 @@ def read_in_plain_data(filename):
     return lines
 
 
-def output_auto_data(auto_data):
-    ''' According to the data structure you used for "auto_data",
-        write code here to output your auto tagged data into a file,
-        using the same format as the provided gold data (i.e. word_pos word_pos ...)
-    '''
-
-    with open('10000_train_1000_dev_online.txt', 'w') as outfile:
-        for line in auto_data:
-            outfile.write(str(line))
-            outfile.write('\n')
-
-
 if __name__ == '__main__':
 
     # Run python train_test_tagger.py train/ptb_02-21.tagged dev/ptb_22.tagged dev/ptb_22.snt test/ptb_23.snt to train & test your tagger
@@ -61,7 +49,6 @@ if __name__ == '__main__':
     # Read in data
     train_data = read_in_gold_data(train_file)
     gold_dev_data = read_in_gold_data(gold_dev_file)
-    plain_dev_data = read_in_plain_data(plain_dev_file)
     test_data = read_in_plain_data(test_file)
 
     # Train your tagger
@@ -70,7 +57,11 @@ if __name__ == '__main__':
     my_tagger.train(train_data, gold_dev_data)
 
     # Apply your tagger on dev & test data
-    auto_test_data = my_tagger.tag(test_data)
+    print('tagging test data...')
+    with open('auto_tagged_online.txt', 'w') as outfile:
+        for sent in test_data:
+            tagged = my_tagger.tag(sent)
+            for word in tagged:
+                outfile.write('{}_{} '.format(word[0], word[1]))
 
-    # Output your auto tagged data
-    output_auto_data(auto_test_data)
+            outfile.write('\n')

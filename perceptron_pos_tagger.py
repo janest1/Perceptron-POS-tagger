@@ -113,10 +113,10 @@ class Perceptron_POS_Tagger(object):
 
         results_file = open('1000train_500dev_averaged.txt', 'w')
 
-        for i in range(5):
+        for i in range(8):
             print('--------------------------------')
             print('minibatch_iteration ', i)
-            train_sentence_count = 0
+            #train_sentence_count = 0
             minibatch = random.sample(train_data, 1000)
             mini_dev = random.sample(dev_data, 500)
             minibatch_update = Vector({})
@@ -141,31 +141,31 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
-                if train_sentence_count % 500 == 0:
-                    print('mini training iteration', i)
-                    print('training sentence', train_sentence_count)
-                    print('p:', predicted)
-                    print('g:', sent)
-                    print('******')
+                # if train_sentence_count % 500 == 0:
+                #     print('mini training iteration', i)
+                #     print('training sentence', train_sentence_count)
+                #     print('p:', predicted)
+                #     print('g:', sent)
+                #     print('******')
 
-                train_sentence_count += 1
+                #train_sentence_count += 1
 
             print('updating weights....')
             self.weights += (1/len(minibatch)) * minibatch_update
 
             tagged_dev = []
-            dev_count = 0
+            #dev_count = 0
             print('tagging dev set....')
             for dev_sent in mini_dev:
                 plain_dev_sent = [tup[0] for tup in dev_sent]
                 dev_tagged = self.tag(plain_dev_sent)
                 tagged_dev.append(dev_tagged)
 
-                if dev_count % 200 == 0:
-                    print('~~tagging dev after mini iteration ', i)
-                    print('~~dev sentence', dev_count)
-                    print('~~~~~~~~~~~~~~~~~~~~~~~~~~')
-                dev_count += 1
+                # if dev_count % 200 == 0:
+                #     print('~~tagging dev after mini iteration ', i)
+                #     print('~~dev sentence', dev_count)
+                #     print('~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                # dev_count += 1
 
             print()
             acc = self.compute_accuracy(mini_dev, tagged_dev)

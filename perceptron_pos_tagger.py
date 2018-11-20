@@ -152,7 +152,9 @@ class Perceptron_POS_Tagger(object):
                 # train_sentence_count += 1
 
             print('updating weights....')
-            self.weights += ((1/len(minibatch)) * minibatch_update)
+            # self.weights += ((1/len(minibatch)) * minibatch_update)
+            self.weights += minibatch_update
+            self.weights = (1/len(minibatch)) * self.weights
 
             tagged_dev = []
             #dev_count = 0

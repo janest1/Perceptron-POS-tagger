@@ -112,6 +112,7 @@ class Perceptron_POS_Tagger(object):
         '''
 
         results_file = open('1000train_500dev_averaged.txt', 'w')
+        results_file.write('1000 train 500 dev averaged\n')
 
         for i in range(8):
             print('--------------------------------')

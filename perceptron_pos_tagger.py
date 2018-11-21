@@ -108,7 +108,7 @@ class Perceptron_POS_Tagger(object):
         for i in range(5):
             print('--------------------------------')
             print('minibatch_iteration ', i)
-            averaged_train = train_data[:10000]
+            averaged_train = train_data[:25000]
 
             for sent in averaged_train:
                 if i == 0:

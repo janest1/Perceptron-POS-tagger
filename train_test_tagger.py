@@ -57,11 +57,11 @@ if __name__ == '__main__':
     my_tagger.train(train_data, gold_dev_data)
 
     # Apply your tagger on dev & test data
-    print('tagging test data...')
-    with open('auto_tagged_online_25k.txt', 'w') as outfile:
-        for sent in test_data:
-            tagged = my_tagger.tag(sent)
-            for word in tagged:
-                outfile.write('{}_{} '.format(word[0], word[1]))
-
-            outfile.write('\n')
+    # print('tagging test data...')
+    # with open('auto_tagged_online_25k.txt', 'w') as outfile:
+    #     for sent in test_data:
+    #         tagged = my_tagger.tag(sent)
+    #         for word in tagged:
+    #             outfile.write('{}_{} '.format(word[0], word[1]))
+    #
+    #         outfile.write('\n')

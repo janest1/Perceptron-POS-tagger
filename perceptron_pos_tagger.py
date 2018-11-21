@@ -59,7 +59,7 @@ class Perceptron_POS_Tagger(object):
             backpointer[tag][0] = '<S>'
 
         # recursive step
-        for t in range(1, len(test_sent)-1):
+        for t in range(1, len(test_sent)):
             best_tag = 'NN'
             for tag in self.tags:
                 max_score = 0
@@ -76,24 +76,31 @@ class Perceptron_POS_Tagger(object):
                 trellis[tag][t] = max_score
                 backpointer[tag][t] = best_tag
 
-        # termination steps
-        max_score = 0
-        best_tag = 'NNS'
-
-        # get best score of transition from each state to end state
+        # # termination steps
+        # max_score = 0
+        # best_tag = 'NNS'
+        #
+        # # get best score of transition from each state to end state
+        # for tag in self.tags:
+        #     final_vector = self.featurize('$END', '</S>', test_sent[-1], tag)
+        #     current_score = trellis[tag][len(test_sent)-1] + self.weights.dot(final_vector)
+        #
+        #     if current_score > max_score:
+        #         max_score = current_score
+        #         best_tag = tag
+        best_final_score = 0
+        best_final_tag = 'NN'
         for tag in self.tags:
-            final_vector = self.featurize('$END', '</S>', test_sent[-1], tag)
-            current_score = trellis[tag][len(test_sent)-1] + self.weights.dot(final_vector)
-
-            if current_score > max_score:
-                max_score = current_score
-                best_tag = tag
+            current_final_score = trellis[tag][len(test_sent)-1]
+            if current_final_score > best_final_score:
+                best_final_score = current_final_score
+                best_final_tag = tag
 
         backpointer['</S>'] = {}
-        backpointer['</S>'][len(test_sent)-1] = best_tag
+        backpointer['</S>'][len(test_sent)-1] = best_final_tag
 
         # traverse backpointer from end state to start state to get predicted tag sequence
-        current_tag = best_tag
+        current_tag = best_final_tag
         t = len(test_sent) - 1
         path = [[test_sent[t], current_tag]]
 
@@ -111,15 +118,17 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('25000train_800dev_online.txt', 'w')
-        results_file.write('25000 train 1000 dev online\n')
+        # results_file = open('25000train_800dev_online.txt', 'w')
+        # results_file.write('25000 train 1000 dev online\n')
 
         for i in range(5):
             print('--------------------------------')
             print('online_iteration ', i)
             train_sentence_count = 0
-            online_train = random.sample(train_data, 25000)
-            online_dev = random.sample(dev_data, 800)
+            # online_train = random.sample(train_data, 25000)
+            # online_dev = random.sample(dev_data, 800)
+            online_train = train_data[:1000]
+            online_dev = dev_data[:500]
 
             for sent in online_train:
                 predicted = self.tag([tup[0] for tup in sent])
@@ -134,15 +143,6 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
-                # if train_sentence_count % 1000 == 0:
-                #     print('online training iteration ', i)
-                #     print('training sentence', train_sentence_count)
-                #     print('p:', predicted)
-                #     print('g:', sent)
-                #     print('******')
-                #
-                # train_sentence_count += 1
-
             tagged_dev = []
             dev_count = 0
             print('tagging dev set')
@@ -150,13 +150,7 @@ class Perceptron_POS_Tagger(object):
                 dev_tagged = self.tag([tup[0] for tup in dev_sent])
                 tagged_dev.append(dev_tagged)
 
-                # if dev_count % 100 == 0:
-                #     print('~~tagging dev. online iteration ', i)
-                #     print('~~dev sentence', dev_count)
-                #     print('~~########################')
-                # dev_count += 1
-
             print()
             acc = self.compute_accuracy(online_dev, tagged_dev)
             print(acc)
-            results_file.write(str(train_sentence_count) + '\t' + str(acc) + '\n')
+            # results_file.write(str(train_sentence_count) + '\t' + str(acc) + '\n')

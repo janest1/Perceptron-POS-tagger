@@ -105,13 +105,10 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        # results_file = open('25000train_1000dev_averaged.txt', 'w')
-        # results_file.write('2500 train 1000 dev averaged\n')
-
         for i in range(5):
             print('--------------------------------')
             print('minibatch_iteration ', i)
-            averaged_train = random.sample(train_data, 25000)
+            averaged_train = train_data[:10000]
 
             for sent in averaged_train:
                 if i == 0:
@@ -143,6 +140,15 @@ class Perceptron_POS_Tagger(object):
                 tagged_dev.append(dev_tagged)
 
             print()
-            acc = self.compute_accuracy(dev_data, tagged_dev)
-            print(acc)
-            #results_file.write(str(i) + '\t' + str(acc) + '\n')
+            dev_acc = self.compute_accuracy(dev_data, tagged_dev)
+            print(dev_acc)
+
+            tagged_train = []
+            print('tagging train set....')
+            for train_sent in averaged_train:
+                train_tagged = self.tag([tup[0] for tup in train_sent])
+                tagged_train.append(train_tagged)
+
+            print()
+            train_acc = self.compute_accuracy(averaged_train, tagged_train)
+            print(train_acc)

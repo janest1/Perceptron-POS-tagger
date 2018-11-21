@@ -105,13 +105,14 @@ class Perceptron_POS_Tagger(object):
         '''
 
         results_file = open('online_10000.txt', 'w')
-        results_file.write('10000 train online')
+        results_file.write('10000 train online\n')
+        results_file.write('{}\t{}\t{}\n'.format('iteration', 'dev accuracy', 'train accuracy'))
+        train_sent_count = 0
 
         for i in range(5):
             print('--------------------------------')
             print('online_iteration ', i)
-            train_sentence_count = 0
-            online_train = train_data[:10]
+            online_train = train_data[:10000]
 
             for sent in online_train:
                 predicted = self.tag([tup[0] for tup in sent])
@@ -126,6 +127,8 @@ class Perceptron_POS_Tagger(object):
                 else:
                     print('correct prediction')
 
+                train_sent_count += 1
+
             tagged_dev = []
             print('tagging dev set')
             for dev_sent in dev_data:
@@ -133,6 +136,16 @@ class Perceptron_POS_Tagger(object):
                 tagged_dev.append(dev_tagged)
 
             print()
-            acc = self.compute_accuracy(dev_data, tagged_dev)
-            print(acc)
-            results_file.write('after iteration {} accuracy = {}'.format(i, acc))
+            dev_acc = self.compute_accuracy(dev_data, tagged_dev)
+            print(dev_acc)
+
+            tagged_train = []
+            print('tagging train set')
+            for train_sent in online_train:
+                train_tagged = self.tag([tup[0] for tup in train_sent])
+                tagged_train.append(train_tagged)
+
+            train_acc = self.compute_accuracy(online_train, tagged_train)
+            print(train_acc)
+
+            results_file.write('{}\t{}\t{}\n'.format(i, dev_acc, train_acc))

@@ -20,6 +20,8 @@ class Perceptron_POS_Tagger(object):
         vector.v[bi_tag] = 1
         emission = 'w0_{} t0_{}'.format(curr_word, curr_tag)
         vector.v[emission] = 1
+        prev_emission = 'w-1_{} t-1_{}'.format(prev_word, prev_tag)
+        vector.v[prev_emission] = 1
 
         return vector
 
@@ -123,9 +125,6 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        # results_file = open('25000train_800dev_online.txt', 'w')
-        # results_file.write('25000 train 1000 dev online\n')
-
         for i in range(5):
             print('--------------------------------')
             print('online_iteration ', i)
@@ -149,7 +148,6 @@ class Perceptron_POS_Tagger(object):
                     print('correct prediction')
 
             tagged_dev = []
-            dev_count = 0
             print('tagging dev set')
             for dev_sent in online_dev:
                 dev_tagged = self.tag([tup[0] for tup in dev_sent])
@@ -158,4 +156,3 @@ class Perceptron_POS_Tagger(object):
             print()
             acc = self.compute_accuracy(online_dev, tagged_dev)
             print(acc)
-            # results_file.write(str(train_sentence_count) + '\t' + str(acc) + '\n')

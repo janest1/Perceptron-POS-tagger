@@ -20,6 +20,8 @@ class Perceptron_POS_Tagger(object):
         vector.v[bi_tag] = 1
         emission = 'w0_{} t0_{}'.format(curr_word, curr_tag)
         vector.v[emission] = 1
+        prev_emission = 'w-1_{} t-1_{}'.format(prev_word, prev_tag)
+        vector.v[prev_emission] = 1
 
         return vector
 
@@ -59,7 +61,7 @@ class Perceptron_POS_Tagger(object):
             backpointer[tag][0] = '<S>'
 
         # recursive step
-        for t in range(1, len(test_sent)-1):
+        for t in range(1, len(test_sent)):
             best_tag = 'NN'
             for tag in self.tags:
                 max_score = 0
@@ -76,34 +78,26 @@ class Perceptron_POS_Tagger(object):
                 trellis[tag][t] = max_score
                 backpointer[tag][t] = best_tag
 
-        # termination steps
-        max_score = 0
-        best_tag = 'NN'
-
-        # get best score of transition from each state to end state
+        best_final_score = 0
+        best_final_tag = 'NN'
         for tag in self.tags:
-            final_vector = self.featurize('$END', '</S>', test_sent[-1], tag)
-            current_score = trellis[tag][len(test_sent)-1] + self.weights.dot(final_vector)
-
-            if current_score > max_score:
-                max_score = current_score
-                best_tag = tag
-
-        backpointer['</S>'] = {}
-        backpointer['</S>'][len(test_sent)-1] = best_tag
+            current_final_score = trellis[tag][len(test_sent) - 1]
+            if current_final_score > best_final_score:
+                best_final_score = current_final_score
+                best_final_tag = tag
 
         # traverse backpointer from end state to start state to get predicted tag sequence
-        current_tag = best_tag
+        current_tag = best_final_tag
         t = len(test_sent) - 1
         path = [[test_sent[t], current_tag]]
 
         if len(test_sent) == 1:
             return path
 
-        while current_tag != '<S>':
+        while t > 0:
+            current_tag = backpointer[current_tag][t]
             t -= 1
             path.insert(0, [test_sent[t], current_tag])
-            current_tag = backpointer[current_tag][t]
 
         return path
 
@@ -111,18 +105,15 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
-        results_file = open('25000train_1000dev_averaged.txt', 'w')
-        results_file.write('2500 train 1000 dev averaged\n')
+        # results_file = open('25000train_1000dev_averaged.txt', 'w')
+        # results_file.write('2500 train 1000 dev averaged\n')
 
         for i in range(5):
             print('--------------------------------')
             print('minibatch_iteration ', i)
-            #train_sentence_count = 0
-            minibatch = random.sample(train_data, 25000)
-            mini_dev = random.sample(dev_data, 1000)
-            minibatch_update = Vector({})
+            averaged_train = random.sample(train_data, 25000)
 
-            for sent in minibatch:
+            for sent in averaged_train:
                 if i == 0:
                     # first iteration has all zero weights, so a default tag of NN is chosen for each
                     # step in the sequence. Get first round of averaged perceptron weight updates using
@@ -138,40 +129,20 @@ class Perceptron_POS_Tagger(object):
 
                 # adjust weights according to difference between correct and predicted sequence
                 if predicted_feats != gold_feats:
-                    minibatch_update += (gold_feats - predicted_feats)
+                    self.weights += (gold_feats - predicted_feats)
                 else:
                     print('correct prediction')
 
-                # if train_sentence_count % 1000 == 0:
-                #     print('mini training iteration', i)
-                #     print('training sentence', train_sentence_count)
-                #     print('p:', predicted)
-                #     print('g:', sent)
-                #     print('******')
-                #
-                # train_sentence_count += 1
-
-            print('updating weights....')
-            # self.weights += ((1/len(minibatch)) * minibatch_update)
-            self.weights += minibatch_update
-            self.weights = (1/len(minibatch)) * self.weights
+            self.weights = (1/len(averaged_train)) * self.weights
 
             tagged_dev = []
-            #dev_count = 0
             print('tagging dev set....')
-            for dev_sent in mini_dev:
+            for dev_sent in dev_data:
                 plain_dev_sent = [tup[0] for tup in dev_sent]
                 dev_tagged = self.tag(plain_dev_sent)
                 tagged_dev.append(dev_tagged)
 
-                # if dev_count % 100 == 0:
-                #     print('~~tagging dev after mini iteration ', i)
-                #     print('~~dev sentence', dev_count)
-                #     print(dev_tagged)
-                #     print('~~~~~~~~~~~~~~~~~~~~~~~~~~')
-                # dev_count += 1
-
             print()
-            acc = self.compute_accuracy(mini_dev, tagged_dev)
+            acc = self.compute_accuracy(dev_data, tagged_dev)
             print(acc)
-            results_file.write(str(i) + '\t' + str(acc) + '\n')
+            #results_file.write(str(i) + '\t' + str(acc) + '\n')

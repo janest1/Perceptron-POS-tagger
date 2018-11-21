@@ -96,8 +96,8 @@ class Perceptron_POS_Tagger(object):
                 best_final_score = current_final_score
                 best_final_tag = tag
 
-        backpointer['</S>'] = {}
-        backpointer['</S>'][len(test_sent)-1] = best_final_tag
+        # backpointer['</S>'] = {}
+        # backpointer['</S>'][len(test_sent)-1] = best_final_tag
 
         # traverse backpointer from end state to start state to get predicted tag sequence
         current_tag = best_final_tag
@@ -107,10 +107,15 @@ class Perceptron_POS_Tagger(object):
         if len(test_sent) == 1:
             return path
 
-        while current_tag != '<S>':
+        # while current_tag != '<S>':
+        #     t -= 1
+        #     path.insert(0, [test_sent[t], current_tag])
+        #     current_tag = backpointer[current_tag][t]
+
+        while t > 0:
+            current_tag = backpointer[current_tag][t]
             t -= 1
             path.insert(0, [test_sent[t], current_tag])
-            current_tag = backpointer[current_tag][t]
 
         return path
 

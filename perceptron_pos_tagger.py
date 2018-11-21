@@ -107,18 +107,11 @@ class Perceptron_POS_Tagger(object):
 
         for i in range(5):
             print('--------------------------------')
-            print('minibatch_iteration ', i)
+            print('averaged_iteration ', i)
             averaged_train = train_data[:25000]
 
             for sent in averaged_train:
-                if i == 0:
-                    # first iteration has all zero weights, so a default tag of NN is chosen for each
-                    # step in the sequence. Get first round of averaged perceptron weight updates using
-                    # this assumption instead of running Viterbi on the first iteration
-                    predicted = [[tup[0], 'NN'] for tup in sent]
-
-                else:
-                    predicted = self.tag([tup[0] for tup in sent])
+                predicted = self.tag([tup[0] for tup in sent])
 
                 # featurize gold and predicted to get representations for full sequence
                 predicted_feats = self.get_sentence_features(predicted)
@@ -139,7 +132,6 @@ class Perceptron_POS_Tagger(object):
                 dev_tagged = self.tag(plain_dev_sent)
                 tagged_dev.append(dev_tagged)
 
-            print()
             dev_acc = self.compute_accuracy(dev_data, tagged_dev)
             print(dev_acc)
 

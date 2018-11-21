@@ -1,6 +1,5 @@
 from sparse_vector import Vector
 from collections import defaultdict
-import random
 
 
 class Perceptron_POS_Tagger(object):
@@ -78,18 +77,6 @@ class Perceptron_POS_Tagger(object):
                 trellis[tag][t] = max_score
                 backpointer[tag][t] = best_tag
 
-        # # termination steps
-        # max_score = 0
-        # best_tag = 'NNS'
-        #
-        # # get best score of transition from each state to end state
-        # for tag in self.tags:
-        #     final_vector = self.featurize('$END', '</S>', test_sent[-1], tag)
-        #     current_score = trellis[tag][len(test_sent)-1] + self.weights.dot(final_vector)
-        #
-        #     if current_score > max_score:
-        #         max_score = current_score
-        #         best_tag = tag
         best_final_score = 0
         best_final_tag = 'NN'
         for tag in self.tags:
@@ -98,9 +85,6 @@ class Perceptron_POS_Tagger(object):
                 best_final_score = current_final_score
                 best_final_tag = tag
 
-        # backpointer['</S>'] = {}
-        # backpointer['</S>'][len(test_sent)-1] = best_final_tag
-
         # traverse backpointer from end state to start state to get predicted tag sequence
         current_tag = best_final_tag
         t = len(test_sent) - 1
@@ -108,11 +92,6 @@ class Perceptron_POS_Tagger(object):
 
         if len(test_sent) == 1:
             return path
-
-        # while current_tag != '<S>':
-        #     t -= 1
-        #     path.insert(0, [test_sent[t], current_tag])
-        #     current_tag = backpointer[current_tag][t]
 
         while t > 0:
             current_tag = backpointer[current_tag][t]
@@ -125,14 +104,14 @@ class Perceptron_POS_Tagger(object):
         ''' Implement the Perceptron training algorithm here.
         '''
 
+        results_file = open('online_10000.txt', 'w')
+        results_file.write('10000 train online')
+
         for i in range(5):
             print('--------------------------------')
             print('online_iteration ', i)
             train_sentence_count = 0
-            # online_train = random.sample(train_data, 25000)
-            # online_dev = random.sample(dev_data, 800)
-            online_train = train_data[:1000]
-            online_dev = dev_data[:500]
+            online_train = train_data[:10]
 
             for sent in online_train:
                 predicted = self.tag([tup[0] for tup in sent])
@@ -149,10 +128,11 @@ class Perceptron_POS_Tagger(object):
 
             tagged_dev = []
             print('tagging dev set')
-            for dev_sent in online_dev:
+            for dev_sent in dev_data:
                 dev_tagged = self.tag([tup[0] for tup in dev_sent])
                 tagged_dev.append(dev_tagged)
 
             print()
-            acc = self.compute_accuracy(online_dev, tagged_dev)
+            acc = self.compute_accuracy(dev_data, tagged_dev)
             print(acc)
+            results_file.write('after iteration {} accuracy = {}'.format(i, acc))
